@@ -31,6 +31,7 @@ def start_bot():
                          'Добро пожаловать {}, user id - {}'.format(message.from_user.first_name,
                                                                     chat_id, ),
                          reply_markup=menu.main_menu)
+
         print(f'Пользователь {chat_id} написал команду /start')
 
     # Command admin
