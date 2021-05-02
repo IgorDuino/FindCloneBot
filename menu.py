@@ -10,6 +10,8 @@ main_menu.add(
 
 main_menu.add(
     types.InlineKeyboardButton(text='💸 Пополнить баланс', callback_data='replenish_balance'),
+)
+main_menu.add(
     types.InlineKeyboardButton(text='👥 Реферальная сеть', callback_data='referral_web')
 )
 
@@ -35,7 +37,9 @@ admin_menu.add(
 
 polit_menu = types.InlineKeyboardMarkup(row_width=2)
 polit_menu.add(
-    types.InlineKeyboardButton(text='🤝 Политика конфиденциальности', callback_data='polit'),
+    types.InlineKeyboardButton(text='🤝 Политика конфиденциальности', callback_data='polit')
+)
+polit_menu.add(
     types.InlineKeyboardButton(text='◀ Назад', callback_data='exit_to_menu')
 )
 

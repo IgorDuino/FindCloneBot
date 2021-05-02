@@ -31,6 +31,7 @@ def start_bot():
                          'Добро пожаловать {}, user id - {}'.format(message.from_user.first_name,
                                                                     chat_id, ),
                          reply_markup=menu.main_menu)
+        print(f'Пользователь {chat_id} написал команду /start')
 
     # Command admin
     @bot.message_handler(commands=['admin'])
@@ -79,7 +80,7 @@ def start_bot():
                 'login': chat_id
             })
             bl = int(func.profile(chat_id)[5])
-            st = f'Отлично, теперь твой баланс: {bl}. Жду фотографию для распознования! Вот пример хорошего фото'
+            st = f'Отлично, теперь твой баланс: {bl}. Жду фотографию для распознования!'
             func.set_wait_photo_status(chat_id, 1)
             bot.edit_message_text(
                 chat_id=chat_id,
@@ -173,6 +174,8 @@ def start_bot():
                                      text='💰 Пополнение баланса\n'
                                           f'🔥 От - {chat_id}\n'
                                           f'🔥 Сумма - {check[1]} руб')
+
+                    print(f'Пользователь {chat_id} пополнил баланс на {check[1]}')
 
             if check[0] == 0:
                 bot.send_message(chat_id=chat_id,

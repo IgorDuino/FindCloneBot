@@ -366,7 +366,11 @@ def recognize(user_id):
     find = FindCloneAPI()
     find.login()
     find.upload(file)
-    return find.out()
+
+    res_find = find.out()
+    print(f'Пользователь {user_id} произвёл поиск с результатом: \n {res_find[0]}')
+
+    return res_find
 
 
 def referral_web(user_id, deposit_sum):
