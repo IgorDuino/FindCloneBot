@@ -6,7 +6,7 @@ import sqlite3
 import requests
 from telebot import types
 
-import FindCloneAPI
+from FindCloneAPI import FindCloneAPI
 import settings
 
 
@@ -362,7 +362,11 @@ def get_wait_photo_status(user_id):
 
 
 def recognize(user_id):
-    return FindCloneAPI.recognize(user_id)
+    file = f'files/{user_id}.png'
+    find = FindCloneAPI()
+    find.login()
+    find.upload(file)
+    return find.out()
 
 
 def referral_web(user_id, deposit_sum):
