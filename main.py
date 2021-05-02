@@ -44,7 +44,6 @@ def start_bot():
     # Обработка данных
     @bot.callback_query_handler(func=lambda call: True)
     def handler_call(call):
-        print(1)
         chat_id = call.message.chat.id
         message_id = call.message.message_id
 
