@@ -1,9 +1,8 @@
 # Token telegran bot
 bot_token = '1737120378:AAGGhWsSRJffgDDvPK-tnBDCs19CoD-NDSw'  # токен бота
-CHANNEL_ID = 0  # id канала куда будет отсылаться информация, ид без -100 в начале (например: 124873248) - указать заместо нуля
 
 # ID admin
-admin_id = 759634381  # id админа - указать заместо нуля
+admin_id = [759634381, 49854982]  # id админа - указать заместо нуля
 
 bot_login = 'poiskphoto_bot'  # логин бота
 ref_percent = 5  # Процент реферальной системы

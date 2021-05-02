@@ -36,7 +36,7 @@ def start_bot():
     @bot.message_handler(commands=['admin'])
     def handler_admin(message):
         chat_id = message.chat.id
-        if chat_id == settings.admin_id:
+        if chat_id in settings.admin_id:
             bot.send_message(chat_id, 'Вы перешли в меню админа', reply_markup=menu.admin_menu)
 
     # Обработка данных
@@ -161,25 +161,18 @@ def start_bot():
                                   reply_markup=menu.main_menu)
 
         if call.data == 'check_payment':
-            check = func.check_payment(chat_id)
-            if check[0] == 1:
-                bot.edit_message_text(chat_id=chat_id,
-                                      message_id=message_id,
-                                      text=f'✅ Оплата прошла\nСумма - {check[1]} руб',
-                                      reply_markup=menu.main_menu)
+            for useradmin in settings.admin_id:
+                check = func.check_payment(chat_id)
+                if check[0] == 1:
+                    bot.edit_message_text(chat_id=chat_id,
+                                          message_id=message_id,
+                                          text=f'✅ Оплата прошла\nСумма - {check[1]} руб',
+                                          reply_markup=menu.main_menu)
 
-                bot.send_message(chat_id=settings.admin_id,
-                                 text='💰 Пополнение баланса\n'
-                                      f'🔥 От - {chat_id}\n'
-                                      f'🔥 Сумма - {check[1]} руб')
-
-                try:
-                    bot.send_message(chat_id=f'-100{settings.CHANNEL_ID}',
+                    bot.send_message(chat_id=useradmin,
                                      text='💰 Пополнение баланса\n'
                                           f'🔥 От - {chat_id}\n'
                                           f'🔥 Сумма - {check[1]} руб')
-                except:
-                    pass
 
             if check[0] == 0:
                 bot.send_message(chat_id=chat_id,
