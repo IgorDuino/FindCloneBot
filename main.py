@@ -152,8 +152,8 @@ def start_bot():
         if call.data == 'replenish_balance':
             bot.edit_message_text(chat_id=chat_id,
                                   message_id=message_id,
-                                  text=func.replenish_balance(chat_id),
-                                  reply_markup=menu.replenish_balance)
+                                  text='❌ Пополнение баланса времено недоступно!',
+                                  reply_markup=menu.main_menu)
 
         if call.data == 'cancel_payment':
             func.cancel_payment(chat_id)
