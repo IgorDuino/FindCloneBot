@@ -1,6 +1,8 @@
 import requests
 import fcsettings as settings
 import json
+import time
+
 
 class FindCloneAPI:
     def __init__(self):
@@ -57,43 +59,49 @@ class FindCloneAPI:
 
         print("Осталось поисков: " + str(self.quantity))
         print("Найдено: " + str(self.total))
-        for person in self.data[:3]:
-            try:
-                photo_url = person['details'][0]['url']
-            except:
-                photo_url = 'chel.jpg'
-            try:
-                age = person['age']
-            except:
-                age = 'Не указан'
-            try:
-                city = person['city']
-            except:
-                city = 'Не указан'
-            try:
-                name = person['firstname']
-            except:
-                name = 'Не указан'
-            try:
-                score = int(float(person['score']) * 100)
-            except:
-                score = 'Не указан'
-            try:
-                userid = person['userid']
-            except:
-                userid = 'Не указан'
-            text = f"""
-👤
-├ Совпадения: {score} %
-├ Имя: {name}
-├ Возраст: {age}
-├ Город: {city}
-└ Страница: https://vk.com/id{userid}
-            """.format(age=age, city=city, name=name, score=score, userid=userid)
 
-            photo_urls.append(photo_url)
-            sts += text
-        return [sts, photo_urls]
+        time.sleep(0.1)
+        try:
+            for person in self.data[:3]:
+                try:
+                    photo_url = person['details'][0]['url']
+                except:
+                    photo_url = 'chel.jpg'
+                try:
+                    age = person['age']
+                except:
+                    age = 'Не указан'
+                try:
+                    city = person['city']
+                except:
+                    city = 'Не указан'
+                try:
+                    name = person['firstname']
+                except:
+                    name = 'Не указан'
+                try:
+                    score = int(float(person['score']) * 100)
+                except:
+                    score = 'Не указан'
+                try:
+                    userid = person['userid']
+                except:
+                    userid = 'Не указан'
+                text = f"""
+    👤
+    ├ Совпадения: {score} %
+    ├ Имя: {name}
+    ├ Возраст: {age}
+    ├ Город: {city}
+    └ Страница: https://vk.com/id{userid}
+                """.format(age=age, city=city, name=name, score=score, userid=userid)
+
+                photo_urls.append(photo_url)
+                sts += text
+            return [sts, photo_urls]
+
+        except:
+            return 'error'
 
 
 def recognize(f):

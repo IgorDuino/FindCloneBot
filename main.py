@@ -312,63 +312,67 @@ def start_bot():
                              text="Фото обрабатывается. Вот вот будет результат")
 
             resf = func.recognize(chat_id)
-            #             resf = [
-            #                 """
-            #                 👤
-            # ├ Совпадения: 84 %
-            # ├ Имя: Тест чел 1
-            # ├ Возраст: 37
-            # ├ Город: Москва
-            # └ Страница: https://vk.com/id2551535
-            #
-            # 👤
-            # ├ Совпадения: 68 %
-            # ├ Имя: Тест чел 2
-            # ├ Возраст: Не указан
-            # ├ Город: Не указан
-            # └ Страница: https://vk.com/id420235404
-            #
-            # 👤
-            # ├ Совпадения: 68 %
-            # ├ Имя: Тест чел 3
-            # ├ Возраст: 31
-            # ├ Город: Зугдиди
-            # └ Страница: https://vk.com/id350649139
-            # """, ['https://i06.fotocdn.net/s122/90c754bad68cd4db/user_xl/2782181550.jpg',
-            #       'https://clipart-db.ru/file_content/rastr/xpeople_034.png.pagespeed.ic.rUAONXIUay.png',
-            #       'https://zvukobook.ru/800/600/https/srazu.pro/wp-content/uploads/2019/09/kartinka-3.-teorija.jpg']
-            #             ]
+            if resf == 'error':
+                bot.send_message(chat_id=chat_id,
+                                 text='Прошу прощения, возникла ошибка! на Ваш баланс возвращено 30р.',
+                                 reply_markup=menu.after_recognize_menu)
+            else:
+                #             resf = [
+                #                 """
+                #                 👤
+                # ├ Совпадения: 84 %
+                # ├ Имя: Тест чел 1
+                # ├ Возраст: 37
+                # ├ Город: Москва
+                # └ Страница: https://vk.com/id2551535
+                #
+                # 👤
+                # ├ Совпадения: 68 %
+                # ├ Имя: Тест чел 2
+                # ├ Возраст: Не указан
+                # ├ Город: Не указан
+                # └ Страница: https://vk.com/id420235404
+                #
+                # 👤
+                # ├ Совпадения: 68 %
+                # ├ Имя: Тест чел 3
+                # ├ Возраст: 31
+                # ├ Город: Зугдиди
+                # └ Страница: https://vk.com/id350649139
+                # """, ['https://i06.fotocdn.net/s122/90c754bad68cd4db/user_xl/2782181550.jpg',
+                #       'https://clipart-db.ru/file_content/rastr/xpeople_034.png.pagespeed.ic.rUAONXIUay.png',
+                #       'https://zvukobook.ru/800/600/https/srazu.pro/wp-content/uploads/2019/09/kartinka-3.-teorija.jpg']
+                #             ]
 
-            restext = f'Результат: \n{resf[0]}'
+                restext = f'Результат: \n{resf[0]}'
 
-            for i in range(1, len(resf[1]) + 1):
-                p = requests.get(resf[1][i - 1])
-                out = open(f"files/{chat_id}_temp{i}.jpg", "wb")
-                out.write(p.content)
-                out.close()
+                for i in range(1, len(resf[1]) + 1):
+                    p = requests.get(resf[1][i - 1])
+                    out = open(f"files/{chat_id}_temp{i}.jpg", "wb")
+                    out.write(p.content)
+                    out.close()
 
-            pic1 = open(f"files/{chat_id}_temp1.jpg", "rb")
-            pic2 = open(f"files/{chat_id}_temp2.jpg", "rb")
-            pic3 = open(f"files/{chat_id}_temp3.jpg", "rb")
+                pic1 = open(f"files/{chat_id}_temp1.jpg", "rb")
+                pic2 = open(f"files/{chat_id}_temp2.jpg", "rb")
+                pic3 = open(f"files/{chat_id}_temp3.jpg", "rb")
 
-            media = [telebot.types.InputMediaPhoto(pic1), telebot.types.InputMediaPhoto(pic2),
-                     telebot.types.InputMediaPhoto(pic3)]
+                media = [telebot.types.InputMediaPhoto(pic1), telebot.types.InputMediaPhoto(pic2),
+                         telebot.types.InputMediaPhoto(pic3)]
 
-            bot.send_media_group(message.chat.id, media)
+                bot.send_media_group(message.chat.id, media)
 
-            bot.send_message(chat_id=chat_id,
-                             text=restext,
-                             reply_markup=menu.after_recognize_menu)
+                bot.send_message(chat_id=chat_id,
+                                 text=restext,
+                                 reply_markup=menu.after_recognize_menu)
 
+                pic1.close()
+                pic2.close()
+                pic3.close()
+
+                os.remove(f"files/{chat_id}_temp1.jpg")
+                os.remove(f"files/{chat_id}_temp2.jpg")
+                os.remove(f"files/{chat_id}_temp3.jpg")
             func.set_wait_photo_status(chat_id, 0)
-
-            pic1.close()
-            pic2.close()
-            pic3.close()
-
-            os.remove(f"files/{chat_id}_temp1.jpg")
-            os.remove(f"files/{chat_id}_temp2.jpg")
-            os.remove(f"files/{chat_id}_temp3.jpg")
 
         else:
             bot.send_message(chat_id=chat_id,
