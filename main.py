@@ -32,7 +32,7 @@ def start_bot():
                                                                     chat_id, ),
                          reply_markup=menu.main_menu)
 
-        print(f'Пользователь {chat_id} написал команду /start')
+        print(f'Пользователь {chat_id} написал команду /start {message}')
 
     # Command admin
     @bot.message_handler(commands=['admin'])
@@ -378,4 +378,5 @@ def start_bot():
     bot.polling(none_stop=True)
 
 
+print('Бот запущен')
 start_bot()
