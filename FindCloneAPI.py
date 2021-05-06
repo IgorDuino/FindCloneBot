@@ -13,13 +13,14 @@ class FindCloneAPI:
         self.headers = {
             "Connection": "keep-alive", "Accept": "application/json, text/plain, */*",
             "X-Requested-With": "XMLHttpRequest",
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                          "(KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36"
         }
         self.session.headers.update(self.headers)
         self.data = None
         self.session_key = None
         self.user_id = None
-        self.userid = None #id site
+        self.userid = None  # id site
         self.quantity = 0
         self.total = 0
 
@@ -110,7 +111,6 @@ def recognize(f):
     find.login()
     find.upload(file)
     return find.out()
-
 
 # recognize(759634381)
 # print(recognize(759634381))

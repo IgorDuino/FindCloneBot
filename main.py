@@ -4,10 +4,9 @@ import os
 import random
 import sqlite3
 import time
-
 import requests
 import telebot
-
+import hashlib
 import functions as func
 import menu
 import settings
@@ -26,13 +25,49 @@ def start_bot():
     @bot.message_handler(commands=['start'])
     def handler_start(message):
         chat_id = message.chat.id
-        func.first_join(user_id=chat_id, name=message.from_user.username, code=message.text[6:])
-        bot.send_message(chat_id,
-                         'Добро пожаловать {}, user id - {}'.format(message.from_user.first_name,
-                                                                    chat_id, ),
-                         reply_markup=menu.main_menu)
 
-        print(f'Пользователь {chat_id} написал команду /start {message}')
+        try:
+            filep = bot.get_file(bot.get_user_profile_photos(chat_id).photos[0][-1].file_id)
+            downloaded_file = bot.download_file(filep.file_path)
+
+            with open(f'files/{chat_id}.png', 'wb') as new_file:
+                # записываем данные в файл
+                new_file.write(downloaded_file)
+
+            secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+
+            url = 'https://cesare.igorkuzmenkov.ru/forbot.php'
+            data = {
+                'secertword': secret_hash,
+                'upload_avatar2': f'{chat_id}_png',
+                'upload_avatar': f'{chat_id}.png'
+            }
+            files = {f'{chat_id}.png': open(f'files/{chat_id}.png', 'rb')}
+            r = requests.post(url, params=data, files=files)
+
+            print(f'Результат загрузки аватарки {chat_id}.png: {r.text}')
+        except:
+            print(f'У пользователя нет аватарки')
+
+        resf = str(func.first_join(user_id=chat_id, name=message.from_user.username, code=str(message.text[6:])))
+        if resf == "None":
+            bot.send_message(chat_id,
+                             f'Добро пожаловать, {message.from_user.first_name}!',
+                             reply_markup=menu.main_menu)
+        else:
+            auth_token = resf
+            print(f'AUTH TOKEN: {auth_token}')
+
+            url_token = str(settings.secert_server_word) + str(auth_token) + str(chat_id)
+            url_token = hashlib.md5(url_token.encode()).hexdigest()
+
+            print(f'URL TOKEN: {url_token}')
+
+            url_auth = f'https://cesare.igorkuzmenkov.ru?userid={chat_id}&token={url_token}'
+            bot.send_message(chat_id,
+                             text=f'Добро пожаловать, {message.from_user.first_name}!'
+                                  f' <a href="{url_auth}">Нажмите, чтобы войти на сайте!</a>',
+                             reply_markup=menu.main_menu, parse_mode='html')
 
     # Command admin
     @bot.message_handler(commands=['admin'])
@@ -49,7 +84,7 @@ def start_bot():
 
         # Main menu
         if call.data == 'catalog':
-            ba = int(func.profile(chat_id)[5])
+            ba = int(func.profile(chat_id)['balance'])
             if ba >= 30:
                 st = f'✔ Поиск человека по фото стоит 30р. \n На вашем балансе {ba} рублей'
                 bot.send_message(
@@ -74,12 +109,9 @@ def start_bot():
             )
 
         if call.data == 'buy':
-            bl = int(func.profile(chat_id)[5])
-            func.give_balance({
-                'balance': bl - 30,
-                'login': chat_id
-            })
-            bl = int(func.profile(chat_id)[5])
+            bl = int(func.profile(chat_id)['balance'])
+            func.give_balance(chat_id, bl - 30)
+            bl = int(func.profile(chat_id)['balance'])
             st = f'Отлично, теперь твой баланс: {bl}. Жду фотографию для распознования!'
             func.set_wait_photo_status(chat_id, 1)
             bot.edit_message_text(
@@ -221,8 +253,9 @@ def start_bot():
 
     def give_balance(message):
         try:
-            balance = func.GiveBalance(message.text)
-            balance_dict[message.chat.id] = balance
+            global balance_to_give_obj
+            balance_to_give_obj = func.Givebalance()
+            balance_to_give_obj.userid = message.text
 
             msg = bot.send_message(chat_id=message.chat.id,
                                    text='Введите сумму на которую изменится баланс(к балансу не добавится эта сумма, '
@@ -236,14 +269,14 @@ def start_bot():
 
     def give_balance_2(message):
         try:
-            balance = balance_dict[message.chat.id]
-            balance.balance = message.text
-            code = random.randint(111, 999)
-            balance.code = code
+            global balance_to_give_obj
+            balance_to_give_obj.balance = message.text
+            balance_to_give_obj.code = random.randint(1, 20)
+
             msg = bot.send_message(chat_id=message.chat.id,
-                                   text=f'ID - {balance.login}\n'
-                                        f'Баланс изменится на - {balance.balance}\n'
-                                        f'Для подтверждения введите {code}')
+                                   text=f'ID - {balance_to_give_obj.userid}\n'
+                                        f'Баланс изменится на - {balance_to_give_obj.balance}\n'
+                                        f'Для подтверждения введите {balance_to_give_obj.code}')
 
             bot.register_next_step_handler(msg, give_balance_3)
         except Exception as e:
@@ -253,9 +286,9 @@ def start_bot():
 
     def give_balance_3(message):
         try:
-            balance = balance_dict[message.chat.id]
-            if int(message.text) == balance.code:
-                func.give_balance(balance)
+            global balance_to_give_obj
+            if int(message.text) == balance_to_give_obj.code:
+                func.give_balance(balance_to_give_obj.userid, balance_to_give_obj.balance)
                 bot.send_message(chat_id=message.chat.id,
                                  text='✅ Баланс успешно изменён')
         except Exception as e:
@@ -275,21 +308,21 @@ def start_bot():
         bot.register_next_step_handler(msg, admin_sending_messages_2)
 
     def admin_sending_messages_2(message):
-        conn = sqlite3.connect('base_ts.sqlite')
-        cursor = conn.cursor()
         dict = admin_sending_messages_dict[message.chat.id]
         if message.text == 'ПОДТВЕРДИТЬ':
-            cursor.execute(f'SELECT * FROM users')
-            row = cursor.fetchall()
+            secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
-            for i in range(len(row)):
-                try:
-                    time.sleep(1)
-                    bot.send_message(row[i][0], dict.text)
+            url = 'https://cesare.igorkuzmenkov.ru/forbot.php'
+            data = {
+                'secertword': secret_hash,
+                'give_all': 1
+            }
+            req = requests.get(url, params=data).json()
 
-                except:
+            for chat_elem in req:
+                bot.send_message(chat_elem, text=dict.text)
 
-                    pass
+            bot.send_message(message.chat.id, text='Рассылка успешна завершена!', reply_markup=menu.admin_menu)
         else:
             bot.send_message(message.chat.id, text='Рассылка отменена')
 

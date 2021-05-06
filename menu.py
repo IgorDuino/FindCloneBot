@@ -29,7 +29,6 @@ replenish_btn.add(
 admin_menu = types.InlineKeyboardMarkup(row_width=2)
 admin_menu.add(types.InlineKeyboardButton(text='💸 Изменить баланс', callback_data='give_balance'))
 admin_menu.add(types.InlineKeyboardButton(text='📧 Рассылка', callback_data='admin_sending_messages'))
-admin_menu.add(types.InlineKeyboardButton(text='🔝 Топ рефералов(доходы)', callback_data='admin_top_ref'))
 admin_menu.add(
     types.InlineKeyboardButton(text='ℹ Информация', callback_data='admin_info'),
     types.InlineKeyboardButton(text='◀ Выйти', callback_data='exit_admin_menu')
