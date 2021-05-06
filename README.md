@@ -1,3 +1,2 @@
-# FindCloneAPI
-В файле srttings введите свои данные для входа в FindClone 
-https://youtu.be/PkqEun-RFkM
+<h1>Cesare</h1>
+Бот для поиска людей по фото 
