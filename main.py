@@ -36,7 +36,7 @@ def start_bot():
 
             secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
-            url = 'https://cesare.igorkuzmenkov.ru/forbot.php'
+            url = 'https://cesare.ru/forbot.php'
             data = {
                 'secertword': secret_hash,
                 'upload_avatar2': f'{chat_id}_png',
@@ -63,7 +63,7 @@ def start_bot():
 
             print(f'URL TOKEN: {url_token}')
 
-            url_auth = f'https://cesare.igorkuzmenkov.ru?userid={chat_id}&token={url_token}'
+            url_auth = f'https://cesare.ru?userid={chat_id}&token={url_token}'
             bot.send_message(chat_id,
                              text=f'Добро пожаловать, {message.from_user.first_name}!'
                                   f' <a href="{url_auth}">Нажмите, чтобы войти на сайте!</a>',
@@ -312,7 +312,7 @@ def start_bot():
         if message.text == 'ПОДТВЕРДИТЬ':
             secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
-            url = 'https://cesare.igorkuzmenkov.ru/forbot.php'
+            url = 'https://cesare.ru/forbot.php'
             data = {
                 'secertword': secret_hash,
                 'give_all': 1

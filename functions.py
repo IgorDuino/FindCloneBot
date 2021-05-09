@@ -54,7 +54,7 @@ def first_join(user_id, name, code):
 
     secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
-    url = 'https://cesare.igorkuzmenkov.ru/forbot.php'
+    url = 'https://cesare.ru/forbot.php'
     data = {
         'secertword': secret_hash,
         'name': name,
@@ -69,7 +69,7 @@ def first_join(user_id, name, code):
 def give_balance(chat_id, balance):
     secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
-    url = 'https://cesare.igorkuzmenkov.ru/forbot.php'
+    url = 'https://cesare.ru/forbot.php'
     data = {
         'secertword': secret_hash,
         'givebalance': balance,
@@ -82,7 +82,7 @@ def give_balance(chat_id, balance):
 def profile(user_id):
     secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
-    url = 'https://cesare.igorkuzmenkov.ru/forbot.php'
+    url = 'https://cesare.ru/forbot.php'
     data = {
         'secertword': secret_hash,
         'user_id': user_id
@@ -92,24 +92,10 @@ def profile(user_id):
     return row
 
 
-def check_ref_code(user_id):
-    conn = sqlite3.connect("base_ts.sqlite")
-    cursor = conn.cursor()
-
-    cursor.execute(f'SELECT * FROM users WHERE user_id = "{user_id}"')
-    user = cursor.fetchone()
-
-    if int(user[3]) == 0:
-        cursor.execute(f'UPDATE users SET ref_code = {user_id} WHERE user_id = "{user_id}"')
-        conn.commit()
-
-    return user_id
-
-
 def set_wait_photo_status(user_id, st):
     secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
-
-    url = 'https://cesare.igorkuzmenkov.ru/forbot.php'
+    print(f'secret_hash: {secret_hash}')
+    url = 'https://cesare.ru/forbot.php'
     data = {
         'secertword': secret_hash,
         'user_id': user_id,
@@ -120,16 +106,17 @@ def set_wait_photo_status(user_id, st):
 
 def get_wait_photo_status(user_id):
     secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+    print(f'secret_hash: {secret_hash}')
 
-    url = 'https://cesare.igorkuzmenkov.ru/forbot.php'
+    url = 'https://cesare.ru/forbot.php'
     data = {
         'secertword': secret_hash,
         'user_id': user_id,
-        'get_photostat': 1
     }
+
     req = requests.get(url, params=data).json()
-    print(req)
-    return req['photo_status']
+
+    return int(req['photo_stat'])
 
 
 def recognize(user_id):
