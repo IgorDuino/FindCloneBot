@@ -135,12 +135,11 @@ def start_bot():
             info = func.profile(chat_id)
             bot.edit_message_text(chat_id=chat_id,
                                   message_id=message_id,
-                                  text=settings.profile.format(
-                                      id=info[0],
-                                      login=f'@{info[1]}',
-                                      data=info[2][:19],
-                                      balance=info[5]
-                                  ),
+                                  text=f'🧾 Профиль\n\n' \
+                                       f'❕ Ваш id - {info["user_id"]}\n' \
+                                       f'❕ Ваш логин - {info["name"]}\n' \
+                                       f'❕ Дата регистрации - {info["date"]}\n\n' \
+                                       f'💰 Ваш баланс - {info["balance"]} рублей',
                                   reply_markup=menu.main_menu)
 
         if call.data == 'infom':
@@ -373,10 +372,19 @@ def start_bot():
                 #       'https://zvukobook.ru/800/600/https/srazu.pro/wp-content/uploads/2019/09/kartinka-3.-teorija.jpg']
                 #             ]
 
-                restext = f'Результат: \n{resf[0]}'
+                restext = f'Результат: '
+                for elem in resf:
+                    restext += f"""
+👤 
+├ Совпадения: {elem["score"]} %
+├ Имя: {elem["name"]}
+├ Возраст: {elem["age"]}
+├ Город: {elem["city"]}
+└ Страница: {elem["vklink"]}
+"""
 
-                for i in range(1, len(resf[1]) + 1):
-                    p = requests.get(resf[1][i - 1])
+                for i in range(1, len(resf) + 1):
+                    p = requests.get(resf[i - 1]['photo_urls'][0])
                     out = open(f"files/{chat_id}_temp{i}.jpg", "wb")
                     out.write(p.content)
                     out.close()

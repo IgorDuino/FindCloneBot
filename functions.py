@@ -120,12 +120,29 @@ def get_wait_photo_status(user_id):
 
 
 def recognize(user_id):
-    file = f'files/{user_id}.png'
-    find = FindCloneAPI()
-    find.login()
-    find.upload(file)
+    # secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+    # print(f'secret_hash: {secret_hash}')
+    #
+    # url = 'https://cesare.ru/forbot.php'
+    # data = {
+    #     'secertword': secret_hash,
+    #     'user_id': user_id,
+    #     'recognize': 1
+    # }
+    # files = {'img': ('img.png', open(f'files/{user_id}.png', 'rb'), 'image/png')}
+    # res_find_req = requests.post(data=data, files=files, url=url).json()
+    #
+    # if res_find_req["search"] != "SUCCESS":
+    #     return 'error'
 
-    res_find = find.out()
-    print(f'Пользователь {user_id} произвёл поиск с результатом: \n {res_find[0]}')
-
-    return res_find
+    data = requests.get(url=f'https://cesare.ru/findres/{user_id}.json').json()
+    return data
+    # file = f'files/{user_id}.png'
+    # find = FindCloneAPI()
+    # find.login()
+    # find.upload(file)
+    #
+    # res_find = find.out()
+    # print(f'Пользователь {user_id} произвёл поиск с результатом: \n {res_find[0]}')
+    #
+    # return res_find
