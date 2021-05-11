@@ -182,7 +182,7 @@ def start_bot():
         if call.data == 'replenish_balance':
             bot.edit_message_text(chat_id=chat_id,
                                   message_id=message_id,
-                                  text='❌ Пополнение баланса времено недоступно!',
+                                  text='Пополнить баланс можно на нашем сайте https://cesare.ru/account!',
                                   reply_markup=menu.main_menu)
 
         if call.data == 'cancel_payment':
