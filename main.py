@@ -31,7 +31,7 @@ def start_bot():
 
             secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
-            url = f'{settings.url}://cesare.ru/forbot.php'
+            url = f'{settings.url}/forbot.php'
             data = {
                 'secertword': secret_hash,
                 'upload_avatar2': f'{chat_id}_png',
