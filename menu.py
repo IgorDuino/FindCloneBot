@@ -11,9 +11,7 @@ main_menu.add(
 main_menu.add(
     types.InlineKeyboardButton(text='💸 Пополнить баланс', callback_data='replenish_balance'),
 )
-main_menu.add(
-    types.InlineKeyboardButton(text='👥 Реферальная сеть', callback_data='referral_web')
-)
+
 
 main_menu.add(
     types.InlineKeyboardButton(text='👤 Профиль', callback_data='profile'),
@@ -63,12 +61,6 @@ btn_purchase.add(
 btn_ok = types.InlineKeyboardMarkup(row_width=3)
 btn_ok.add(
     types.InlineKeyboardButton(text='🆗 Понял', callback_data='btn_ok')
-)
-
-replenish_balance = types.InlineKeyboardMarkup(row_width=3)
-replenish_balance.add(
-    types.InlineKeyboardButton(text='🔄 Проверить', callback_data='check_payment'),
-    types.InlineKeyboardButton(text='❌ Отменить', callback_data='cancel_payment')
 )
 
 to_close = types.InlineKeyboardMarkup(row_width=3)

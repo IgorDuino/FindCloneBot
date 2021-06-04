@@ -2,19 +2,14 @@
 # -*- coding: utf-8 -*-
 import os
 import random
-import sqlite3
-import time
 import requests
 import telebot
 import hashlib
 import functions as func
 import menu
 import settings
+from telebot.types import LabeledPrice
 
-catalog_dict = {}
-product_dict = {}
-download_dict = {}
-balance_dict = {}
 admin_sending_messages_dict = {}
 
 
@@ -75,6 +70,22 @@ def start_bot():
         chat_id = message.chat.id
         if chat_id in settings.admin_id:
             bot.send_message(chat_id, 'Вы перешли в меню админа', reply_markup=menu.admin_menu)
+
+    @bot.pre_checkout_query_handler(func=lambda query: True)
+    def checkout(pre_checkout_query):
+        bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
+                                      error_message="Попробуй еще раз позже!")
+
+    @bot.message_handler(content_types=['successful_payment'])
+    def got_payment(message):
+        old_balance = int(func.profile(message.chat.id)['balance'])
+        func.give_balance(message.chat.id, old_balance + int(message.successful_payment.total_amount / 100))
+        new_balance = int(func.profile(message.chat.id)['balance'])
+
+        bot.send_message(message.chat.id,
+                         f'Вы успешно пополнили баланс на`'
+                         f'{message.successful_payment.total_amount / 100} {message.successful_payment.currency}`.'
+                         f'Теперь ваш баланс {new_balance}', reply_markup=menu.main_menu)
 
     # Обработка данных
     @bot.callback_query_handler(func=lambda call: True)
@@ -154,15 +165,6 @@ def start_bot():
             with open("privacy.txt", "rb") as file:
                 bot.send_document(chat_id=chat_id, data=file)
 
-        # Admin menu
-        if call.data == 'admin_info':
-            bot.edit_message_text(
-                chat_id=chat_id,
-                message_id=message_id,
-                text=func.admin_info(),
-                reply_markup=menu.admin_menu
-            )
-
         if call.data == 'exit_admin_menu':
             bot.edit_message_text(
                 chat_id=chat_id,
@@ -180,38 +182,10 @@ def start_bot():
             )
 
         if call.data == 'replenish_balance':
-            bot.edit_message_text(chat_id=chat_id,
-                                  message_id=message_id,
-                                  text='Пополнить баланс можно на нашем сайте https://cesare.ru/account!',
-                                  reply_markup=menu.main_menu)
+            msg = bot.send_message(chat_id=chat_id,
+                                   text='Введите сумму для пополнения (мин 100р)')
 
-        if call.data == 'cancel_payment':
-            func.cancel_payment(chat_id)
-            bot.edit_message_text(chat_id=chat_id,
-                                  message_id=message_id,
-                                  text='❕ Добро пожаловать!',
-                                  reply_markup=menu.main_menu)
-
-        if call.data == 'check_payment':
-            for useradmin in settings.admin_id:
-                check = func.check_payment(chat_id)
-                if check[0] == 1:
-                    bot.edit_message_text(chat_id=chat_id,
-                                          message_id=message_id,
-                                          text=f'✅ Оплата прошла\nСумма - {check[1]} руб',
-                                          reply_markup=menu.main_menu)
-
-                    bot.send_message(chat_id=useradmin,
-                                     text='💰 Пополнение баланса\n'
-                                          f'🔥 От - {chat_id}\n'
-                                          f'🔥 Сумма - {check[1]} руб')
-
-                    print(f'Пользователь {chat_id} пополнил баланс на {check[1]}')
-
-            if check[0] == 0:
-                bot.send_message(chat_id=chat_id,
-                                 text='❌ Оплата не найдена',
-                                 reply_markup=menu.to_close)
+            bot.register_next_step_handler(msg, selecting_the__deposit_amount)
 
         if call.data == 'to_close':
             bot.delete_message(chat_id=chat_id,
@@ -243,12 +217,41 @@ def start_bot():
                 parse_mode='html'
             )
 
-        if call.data == 'admin_top_ref':
-            bot.send_message(
-                chat_id=chat_id,
-                text=func.admin_top_ref(),
-                parse_mode='html'
-            )
+    def selecting_the__deposit_amount(message):
+        if not str(message.text).isdigit():
+            msg = bot.send_message(chat_id=message.chat.id,
+                                   text='Вы отправили не число! Пожалуйста напишите сумму для пополнения (мин 100р)')
+
+            bot.register_next_step_handler(msg, selecting_the__deposit_amount)
+
+        else:
+            amount = int(message.text)
+
+            if amount < 100:
+                msg = bot.send_message(chat_id=message.chat.id,
+                                       text='Вы отправили число меньше 100! Пожалуйста напишите сумму для пополнения (мин 100р)')
+
+                bot.register_next_step_handler(msg, selecting_the__deposit_amount)
+            elif amount > 500000:
+                msg = bot.send_message(chat_id=message.chat.id,
+                                       text='Вы отправили число больше 500000! Пожалуйста напишите сумму для пополнения (мин 100р)')
+
+                bot.register_next_step_handler(msg, selecting_the__deposit_amount)
+
+            else:
+                prices = [LabeledPrice(label='Пополнение баланса', amount=amount * 100)]
+                bot.send_invoice(message.chat.id, title='Пополнение баланса',
+                                 description=f'Пополнение баланса на {amount} RUB',
+                                 provider_token=settings.provider_token,
+                                 currency='rub',
+                                 photo_url='https://cesare.ru/cesare.png',
+                                 photo_height=512,  # !=0/None or picture won't be shown
+                                 photo_width=512,
+                                 photo_size=512,
+                                 is_flexible=False,  # True If you need to set up Shipping Fee
+                                 prices=prices,
+                                 start_parameter='time-machine-example',
+                                 invoice_payload='HAPPY FRIDAYS COUPON')
 
     def give_balance(message):
         try:
@@ -346,19 +349,10 @@ def start_bot():
                                  reply_markup=menu.after_recognize_menu)
             else:
 
-                restext = f'Результат: '
-                for elem in resf:
-                    restext += f"""
-👤 
-├ Совпадения: {elem["score"]} %
-├ Имя: {elem["name"]}
-├ Возраст: {elem["age"]}
-├ Город: {elem["city"]}
-└ Страница: {elem["vklink"]}
-"""
+                restext = f'Результат: \n{resf[0]}'
 
-                for i in range(1, len(resf) + 1):
-                    p = requests.get(resf[i - 1]['photo_urls'][0])
+                for i in range(1, len(resf[1]) + 1):
+                    p = requests.get(resf[1][i - 1])
                     out = open(f"files/{chat_id}_temp{i}.jpg", "wb")
                     out.write(p.content)
                     out.close()
