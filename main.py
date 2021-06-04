@@ -77,9 +77,9 @@ def start_bot():
                                       error_message="Попробуй еще раз позже!")
 
     @bot.message_handler(content_types=['successful_payment'])
-    def got_payment(message):
+    def got_payment(message: telebot.types.Message):
         old_balance = int(func.profile(message.chat.id)['balance'])
-        func.give_balance(message.chat.id, old_balance + int(message.successful_payment.total_amount / 100))
+        func.give_balance(message.chat.id, old_balance + message.successful_payment.total_amount // 100)
 
         profile1 = func.profile(message.chat.id)
 
@@ -87,22 +87,24 @@ def start_bot():
         who_invite = profile1['who_invite']
 
         for admin_id in settings.admin_id:
-            bot.send_message(chat_id=admin_id, text=f'Пользователь {message.chat.id}')
+            bot.send_message(chat_id=admin_id,
+                             text=f'Пользователь {message.chat.id} успешно пополнил баланс на'
+                                  f' {message.successful_payment.total_amount / 100} руб')
 
-        if who_invite != 0:
+        if int(who_invite) != 0:
             ref_sum = int(message.successful_payment.total_amount / 10000 * settings.ref_percent)
             bot.send_message(chat_id=who_invite,
                              text=f'Пользователь, перешедший по вашей реферальной ссылке, пополнил баланс на  '
-                                  f'{message.successful_payment.total_amount / 100} rub. Вы получили '
+                                  f'{message.successful_payment.total_amount // 100} руб. Вы получили '
                                   f'{ref_sum}'
                                   f' руб ({settings.ref_percent} %).')
             old_balance_ref = int(func.profile(message.chat.id)['balance'])
             func.give_balance(who_invite, old_balance_ref + ref_sum)
 
-        bot.send_message(message.chat.id,
-                         f'Вы успешно пополнили баланс на`'
-                         f'{message.successful_payment.total_amount / 100} {message.successful_payment.currency}`.'
-                         f'Теперь ваш баланс {new_balance}', reply_markup=menu.main_menu)
+        bot.send_message(chat_id=message.chat.id, text=
+        f'Вы успешно пополнили баланс на`'
+        f'{message.successful_payment.total_amount // 100} руб`.'
+        f'Теперь ваш баланс {new_balance}', reply_markup=menu.main_menu)
 
     # Обработка данных
     @bot.callback_query_handler(func=lambda call: True)
