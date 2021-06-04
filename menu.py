@@ -11,6 +11,9 @@ main_menu.add(
 main_menu.add(
     types.InlineKeyboardButton(text='💸 Пополнить баланс', callback_data='replenish_balance'),
 )
+main_menu.add(
+    types.InlineKeyboardButton(text='💸 Реферальная система', callback_data='referral_web'),
+)
 
 
 main_menu.add(
@@ -28,7 +31,6 @@ admin_menu = types.InlineKeyboardMarkup(row_width=2)
 admin_menu.add(types.InlineKeyboardButton(text='💸 Изменить баланс', callback_data='give_balance'))
 admin_menu.add(types.InlineKeyboardButton(text='📧 Рассылка', callback_data='admin_sending_messages'))
 admin_menu.add(
-    types.InlineKeyboardButton(text='ℹ Информация', callback_data='admin_info'),
     types.InlineKeyboardButton(text='◀ Выйти', callback_data='exit_admin_menu')
 )
 

@@ -54,9 +54,15 @@ def first_join(user_id, name, code):
 
     secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
+    who_invite = '0'
+    if code != '' and code[:5] != " auth":
+        who_invite = code
+
+
     url = 'https://cesare.ru/forbot.php'
     data = {
         'secertword': secret_hash,
+        'who_invite': who_invite,
         'name': name,
         'user_id': user_id
     }

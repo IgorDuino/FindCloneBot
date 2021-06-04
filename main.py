@@ -31,7 +31,7 @@ def start_bot():
 
             secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
-            url = 'https://cesare.ru/forbot.php'
+            url = f'{settings.url}://cesare.ru/forbot.php'
             data = {
                 'secertword': secret_hash,
                 'upload_avatar2': f'{chat_id}_png',
@@ -58,7 +58,7 @@ def start_bot():
 
             print(f'URL TOKEN: {url_token}')
 
-            url_auth = f'https://cesare.ru?userid={chat_id}&token={url_token}'
+            url_auth = f'{settings.url}?userid={chat_id}&token={url_token}'
             bot.send_message(chat_id,
                              text=f'Добро пожаловать, {message.from_user.first_name}!'
                                   f' <a href="{url_auth}">Нажмите, чтобы войти на сайте!</a>',
@@ -80,7 +80,24 @@ def start_bot():
     def got_payment(message):
         old_balance = int(func.profile(message.chat.id)['balance'])
         func.give_balance(message.chat.id, old_balance + int(message.successful_payment.total_amount / 100))
-        new_balance = int(func.profile(message.chat.id)['balance'])
+
+        profile1 = func.profile(message.chat.id)
+
+        new_balance = int(profile1['balance'])
+        who_invite = profile1['who_invite']
+
+        for admin_id in settings.admin_id:
+            bot.send_message(chat_id=admin_id, text=f'Пользователь {message.chat.id}')
+
+        if who_invite != 0:
+            ref_sum = int(message.successful_payment.total_amount / 10000 * settings.ref_percent)
+            bot.send_message(chat_id=who_invite,
+                             text=f'Пользователь, перешедший по вашей реферальной ссылке, пополнил баланс на  '
+                                  f'{message.successful_payment.total_amount / 100} rub. Вы получили '
+                                  f'{ref_sum}'
+                                  f' руб ({settings.ref_percent} %).')
+            old_balance_ref = int(func.profile(message.chat.id)['balance'])
+            func.give_balance(who_invite, old_balance_ref + ref_sum)
 
         bot.send_message(message.chat.id,
                          f'Вы успешно пополнили баланс на`'
@@ -203,14 +220,15 @@ def start_bot():
             bot.register_next_step_handler(msg, admin_sending_messages)
 
         if call.data == 'referral_web':
-            ref_code = func.check_ref_code(chat_id)
+            profile1 = func.profile(chat_id)
+            ref_code = profile1['ref_code']
+
             bot.edit_message_text(
                 chat_id=chat_id,
                 message_id=message_id,
                 text=f'👥 Реферальная сеть\n\n'
                      f'Ваша реферельная ссылка:\n'
                      f'https://teleg.run/{settings.bot_login}?start={ref_code}\n\n'
-                     f'За все время вы заработали - {func.check_all_profit_user(chat_id)} ₽\n\n'
                      f'<i>Если человек приглашенный по вашей реферальной ссылки пополнит баланс, то вы получите '
                      f'{settings.ref_percent} % от суммы его депозита</i>',
                 reply_markup=menu.main_menu,
@@ -244,7 +262,7 @@ def start_bot():
                                  description=f'Пополнение баланса на {amount} RUB',
                                  provider_token=settings.provider_token,
                                  currency='rub',
-                                 photo_url='https://cesare.ru/cesare.png',
+                                 photo_url=f'{settings.url}/cesare.png',
                                  photo_height=512,  # !=0/None or picture won't be shown
                                  photo_width=512,
                                  photo_size=512,
@@ -314,7 +332,7 @@ def start_bot():
         if message.text == 'ПОДТВЕРДИТЬ':
             secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
 
-            url = 'https://cesare.ru/forbot.php'
+            url = f'{settings.url}/forbot.php'
             data = {
                 'secertword': secret_hash,
                 'give_all': 1
