@@ -11,7 +11,7 @@ class Catalog:
         self.name = name
 
 
-class Givebalance:
+class SetBalance:
     def __init__(self):
         self.userid = 0
         self.balance = 0
@@ -52,12 +52,11 @@ class Admin_sending_messages:
 def first_join(user_id, name, code):
     print(f'Пользователь {user_id} запустил бота с атрибутом {code}')
 
-    secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+    secret_hash = hashlib.md5(settings.secret_server_word.encode()).hexdigest()
 
     who_invite = '0'
     if code != '' and code[:5] != " auth":
         who_invite = code
-
 
     url = 'https://cesare.ru/forbot.php'
     data = {
@@ -73,7 +72,7 @@ def first_join(user_id, name, code):
 
 
 def give_balance(chat_id, balance):
-    secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+    secret_hash = hashlib.md5(settings.secret_server_word.encode()).hexdigest()
 
     url = 'https://cesare.ru/forbot.php'
     data = {
@@ -86,7 +85,7 @@ def give_balance(chat_id, balance):
 
 
 def profile(user_id):
-    secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+    secret_hash = hashlib.md5(settings.secret_server_word.encode()).hexdigest()
 
     url = 'https://cesare.ru/forbot.php'
     data = {
@@ -99,7 +98,7 @@ def profile(user_id):
 
 
 def set_wait_photo_status(user_id, st):
-    secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+    secret_hash = hashlib.md5(settings.secret_server_word.encode()).hexdigest()
     print(f'secret_hash: {secret_hash}')
     url = 'https://cesare.ru/forbot.php'
     data = {
@@ -111,7 +110,7 @@ def set_wait_photo_status(user_id, st):
 
 
 def get_wait_photo_status(user_id):
-    secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+    secret_hash = hashlib.md5(settings.secret_server_word.encode()).hexdigest()
     print(f'secret_hash: {secret_hash}')
 
     url = 'https://cesare.ru/forbot.php'

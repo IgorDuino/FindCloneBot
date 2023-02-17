@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import os
 import random
 import requests
@@ -16,33 +17,32 @@ admin_sending_messages_dict = {}
 def start_bot():
     bot = telebot.TeleBot(settings.bot_token)
 
-    # Command start
     @bot.message_handler(commands=['start'])
     def handler_start(message):
         chat_id = message.chat.id
 
         try:
-            filep = bot.get_file(bot.get_user_profile_photos(chat_id).photos[0][-1].file_id)
-            downloaded_file = bot.download_file(filep.file_path)
+            file = bot.get_file(bot.get_user_profile_photos(chat_id).photos[0][-1].file_id)
+            downloaded_file = bot.download_file(file.file_path)
 
             with open(f'files/{chat_id}.png', 'wb') as new_file:
                 # записываем данные в файл
                 new_file.write(downloaded_file)
 
-            secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+            secret_hash = hashlib.md5(settings.secret_server_word.encode()).hexdigest()
 
             url = f'{settings.url}/forbot.php'
             data = {
-                'secertword': secret_hash,
+                'secertword': secret_hash,  # Cannot refactor because of outdated server typo :)
                 'upload_avatar2': f'{chat_id}_png',
                 'upload_avatar': f'{chat_id}.png'
             }
             files = {f'{chat_id}.png': open(f'files/{chat_id}.png', 'rb')}
             r = requests.post(url, params=data, files=files)
 
-            print(f'Результат загрузки аватарки {chat_id}.png: {r.text}')
-        except:
-            print(f'У пользователя нет аватарки')
+
+        except Exception as e:
+            pass
 
         resf = str(func.first_join(user_id=chat_id, name=message.from_user.username, code=str(message.text[6:])))
         if resf == "None":
@@ -51,12 +51,9 @@ def start_bot():
                              reply_markup=menu.main_menu)
         else:
             auth_token = resf
-            print(f'AUTH TOKEN: {auth_token}')
 
-            url_token = str(settings.secert_server_word) + str(auth_token) + str(chat_id)
+            url_token = str(settings.secret_server_word) + str(auth_token) + str(chat_id)
             url_token = hashlib.md5(url_token.encode()).hexdigest()
-
-            print(f'URL TOKEN: {url_token}')
 
             url_auth = f'{settings.url}?userid={chat_id}&token={url_token}'
             bot.send_message(chat_id,
@@ -64,11 +61,10 @@ def start_bot():
                                   f' <a href="{url_auth}">Нажмите, чтобы войти на сайте!</a>',
                              reply_markup=menu.main_menu, parse_mode='html')
 
-    # Command admin
     @bot.message_handler(commands=['admin'])
     def handler_admin(message):
         chat_id = message.chat.id
-        if chat_id in settings.admin_id:
+        if chat_id in settings.admins_ids:
             bot.send_message(chat_id, 'Вы перешли в меню админа', reply_markup=menu.admin_menu)
 
     @bot.pre_checkout_query_handler(func=lambda query: True)
@@ -86,7 +82,7 @@ def start_bot():
         new_balance = int(profile1['balance'])
         who_invite = profile1['who_invite']
 
-        for admin_id in settings.admin_id:
+        for admin_id in settings.admins_ids:
             bot.send_message(chat_id=admin_id,
                              text=f'Пользователь {message.chat.id} успешно пополнил баланс на'
                                   f' {message.successful_payment.total_amount / 100} руб')
@@ -101,18 +97,16 @@ def start_bot():
             old_balance_ref = int(func.profile(message.chat.id)['balance'])
             func.give_balance(who_invite, old_balance_ref + ref_sum)
 
-        bot.send_message(chat_id=message.chat.id, text=
-        f'Вы успешно пополнили баланс на`'
-        f'{message.successful_payment.total_amount // 100} руб`.'
-        f'Теперь ваш баланс {new_balance}', reply_markup=menu.main_menu)
+        bot.send_message(chat_id=message.chat.id,
+                         text=f'Вы успешно пополнили баланс на`'
+                              f'{message.successful_payment.total_amount // 100} руб`.'
+                              f'Теперь ваш баланс {new_balance}', reply_markup=menu.main_menu)
 
-    # Обработка данных
     @bot.callback_query_handler(func=lambda call: True)
     def handler_call(call):
         chat_id = call.message.chat.id
         message_id = call.message.message_id
 
-        # Main menu
         if call.data == 'catalog':
             ba = int(func.profile(chat_id)['balance'])
             if ba >= 30:
@@ -181,8 +175,8 @@ def start_bot():
             )
 
         if call.data == 'polit':
-            with open("privacy.txt", "rb") as file:
-                bot.send_document(chat_id=chat_id, data=file)
+            with open("terms.txt", "rb") as file:
+                bot.send_document(chat_id=chat_id, document=file)
 
         if call.data == 'exit_admin_menu':
             bot.edit_message_text(
@@ -276,7 +270,7 @@ def start_bot():
     def give_balance(message):
         try:
             global balance_to_give_obj
-            balance_to_give_obj = func.Givebalance()
+            balance_to_give_obj = func.SetBalance()
             balance_to_give_obj.userid = message.text
 
             msg = bot.send_message(chat_id=message.chat.id,
@@ -332,7 +326,7 @@ def start_bot():
     def admin_sending_messages_2(message):
         dict = admin_sending_messages_dict[message.chat.id]
         if message.text == 'ПОДТВЕРДИТЬ':
-            secret_hash = hashlib.md5(settings.secert_server_word.encode()).hexdigest()
+            secret_hash = hashlib.md5(settings.secret_server_word.encode()).hexdigest()
 
             url = f'{settings.url}/forbot.php'
             data = {

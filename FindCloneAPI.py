@@ -1,13 +1,12 @@
 import requests
-import fcsettings as settings
-import json
+from settings import fc_login, fc_password
 import time
 
 
 class FindCloneAPI:
     def __init__(self):
-        self.phone = settings.phone
-        self.pasw = settings.pasw
+        self.phone = fc_login
+        self.password = fc_password
 
         self.session = requests.Session()
         self.headers = {
@@ -27,7 +26,7 @@ class FindCloneAPI:
     def login(self):
         try:
             url = 'https://findclone.ru/login'
-            data = {'phone': self.phone, 'password': self.pasw}
+            data = {'phone': self.phone, 'password': self.password}
             logging = self.session.post(url, data=data).json()
             print(logging)
             self.session_key = logging['session_key']

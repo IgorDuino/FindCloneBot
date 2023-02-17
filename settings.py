@@ -1,18 +1,14 @@
-# Token telegran bot
-bot_token = '1737120378:AAGGhWsSRJffgDDvPK-tnBDCs19CoD-NDSw'  # токен бота
+from decouple import config
 
-# ID admin
-admin_id = [759634381, 49854982]  # id админа - указать заместо нуля
-# admin_id = [759634381]
+bot_token = config("TOKEN")
+admins_ids = config('ADMIN_IDS', cast=lambda x: [int(i) for i in x.split(',')])
+bot_login = config('BOT_LOGIN')
 
-bot_login = 'poiskphoto_bot'  # логин бота
-ref_percent = 20
+ref_percent = config("REF_PERCENT", cast=int)
+url = config("URL")
+provider_token = config("PROVIDER_TOKEN")
 
-url = "https://cesare.ru"
+secret_server_word = config("SECRET_WORD")
 
-provider_token = '390540012:LIVE:17394'
-# provider_token = '381764678:TEST:26373'
-
-secert_server_word = 'pipi'# Процент реферальной системы
-
-info = '''Cesare бот позволяет найти информацию о человеке по его фото. Странику ВКонтакте, город, имя и тд\n'''
+fc_login = config("FC_LOGIN")
+fc_password = config("FC_PASSWORD")

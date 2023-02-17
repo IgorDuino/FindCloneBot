@@ -1,6 +1,5 @@
 from telebot import types
 
-
 # Main menu
 main_menu = types.InlineKeyboardMarkup(row_width=2)
 
@@ -14,7 +13,6 @@ main_menu.add(
 main_menu.add(
     types.InlineKeyboardButton(text='💸 Реферальная система', callback_data='referral_web'),
 )
-
 
 main_menu.add(
     types.InlineKeyboardButton(text='👤 Профиль', callback_data='profile'),
@@ -69,7 +67,3 @@ to_close = types.InlineKeyboardMarkup(row_width=3)
 to_close.add(
     types.InlineKeyboardButton(text='❌', callback_data='to_close')
 )
-
-
-
-
